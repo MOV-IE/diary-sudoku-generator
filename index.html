@@ -35,7 +35,7 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
 .sheetlbl{font-size:10px;color:#777;margin-bottom:4px}
 .sheet{overflow:hidden;background:#fff;position:relative;box-shadow:0 1px 6px rgba(0,0,0,.12)}
 .sheet .page{position:absolute}
-.cm{position:absolute;background:#000}
+.cm{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .ringstrip{position:absolute;top:0;bottom:0;background:rgba(139,107,88,.07);pointer-events:none}
 .ringhole{position:absolute;border-radius:50%;border:.3mm dashed #b9a597;background:#ecebe8;pointer-events:none}
 .solo{box-shadow:0 1px 6px rgba(0,0,0,.12)}
@@ -455,11 +455,12 @@ function placeSheet(slots, label, o, mirror) {
     h += html.replace('<section class="page', `<section style="left:${o.x0 + c*pw}mm;top:${o.y0 + r*ph}mm" class="page`);
   });
   if (st.crop) {
-    const g = 2, L = 5, t = .1, x1 = o.x0 + o.cols*pw, y1 = o.y0 + o.rows*ph;
-    for (let c = 0; c <= o.cols; c++) { const x = o.x0 + c*pw;
-      h += `<div class="cm" style="left:${x - t/2}mm;top:${o.y0 - g - L}mm;width:${t}mm;height:${L}mm"></div><div class="cm" style="left:${x - t/2}mm;top:${y1 + g}mm;width:${t}mm;height:${L}mm"></div>`; }
-    for (let r = 0; r <= o.rows; r++) { const y = o.y0 + r*ph;
-      h += `<div class="cm" style="left:${o.x0 - g - L}mm;top:${y - t/2}mm;width:${L}mm;height:${t}mm"></div><div class="cm" style="left:${x1 + g}mm;top:${y - t/2}mm;width:${L}mm;height:${t}mm"></div>`; }
+    // 재단선은 한 장 전체를 덮는 SVG 선으로 그려요. 아주 얇은 div는 뷰어·배율에 따라 0px로 뭉개져 사라질 수 있어요.
+    const g = 2, L = 5, x1 = o.x0 + o.cols*pw, y1 = o.y0 + o.rows*ph;
+    let d = '';
+    for (let c = 0; c <= o.cols; c++) { const x = o.x0 + c*pw; d += `M${x} ${o.y0 - g - L}v${L}M${x} ${y1 + g}v${L}`; }
+    for (let r = 0; r <= o.rows; r++) { const y = o.y0 + r*ph; d += `M${o.x0 - g - L} ${y}h${L}M${x1 + g} ${y}h${L}`; }
+    h += `<svg class="cm" viewBox="0 0 ${o.W} ${o.H}" style="width:${o.W}mm;height:${o.H}mm"><path d="${d}" stroke="#000" stroke-width=".1" fill="none"/></svg>`;
   }
   return `<div class="sheetwrap"><div class="sheetlbl">${label}</div><div class="sheet" style="width:${o.W - 0.2}mm;height:${o.H - 0.2}mm">${h}</div></div>`;
 }
