@@ -38,9 +38,8 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 - **Level label:** English (`easy.`), Korean (`쉬움`), or none.
 - **Difficulty dots (●○○○), a time field, and a footer** (`sudoku` by default) can each be turned on or off.
 
-### Fonts, colors and lines
+### Colors and lines
 
-- **Font:** Open Sans, Jost, Helvetica, Avenir, Didot, or the name of any font installed on your computer.
 - **Sizes:** number label size and digit size relative to the cell.
 - **Colors:** lines (dark brown #5B4636 by default), text, answer digits, dots and footer.
 - **Lines:** separate widths for thin cell lines and thick 3×3 lines, plus optional shading on alternate 3×3 boxes.
@@ -59,7 +58,7 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 1. Open the page.
 2. In the left panel, choose the number of puzzles, difficulty and puzzles per page.
 3. Press **새 퍼즐 만들기** until you like the set. Note its **puzzle number** if you want to keep it.
-4. Adjust fonts, colors and margins. The preview updates as you go.
+4. Adjust colors and margins. The preview updates as you go.
 5. Press **PDF로 저장 / 인쇄** (save PDF / print) and choose **Save as PDF** in the print dialog. Set margins to "None" and scale to 100%. If the paper size isn't picked up, open the page in Chrome.
 
 Your settings are saved in the browser and come back next time; the puzzles are new on every visit. **처음 설정으로 되돌리기** (reset) restores the defaults.
@@ -76,7 +75,7 @@ Example: 12 puzzles, two per page, A4 double-sided: 6 puzzle pages + 2 answer pa
 
 ## Files
 
-- `index.html`: the whole editor, including the puzzle generator and the embedded fonts. You can download just this file and open it locally; it works the same.
+- `index.html`: the whole editor, including the puzzle generator. You can download just this file and open it locally; it works the same.
 
 ## How the puzzles are made
 
