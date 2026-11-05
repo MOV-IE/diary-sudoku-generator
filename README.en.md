@@ -40,7 +40,7 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 
 ### Fonts, colors and lines
 
-- **Font:** Futura (default), Jost (embedded), Helvetica, Avenir, Didot, or the name of any font installed on your computer. Without Futura it falls back to Jost, a free look-alike.
+- **Font:** Open Sans, Jost, Helvetica, Avenir, Didot, or the name of any font installed on your computer.
 - **Sizes:** number label size and digit size relative to the cell.
 - **Colors:** lines (dark brown #5B4636 by default), text, answer digits, dots and footer.
 - **Lines:** separate widths for thin cell lines and thick 3×3 lines, plus optional shading on alternate 3×3 boxes.
@@ -76,7 +76,7 @@ Example: 12 puzzles, two per page, A4 double-sided: 6 puzzle pages + 2 answer pa
 
 ## Files
 
-- `index.html`: the whole editor, including the puzzle generator and the embedded Jost font. You can download just this file and open it locally; it works the same.
+- `index.html`: the whole editor, including the puzzle generator and the embedded fonts. You can download just this file and open it locally; it works the same.
 
 ## How the puzzles are made
 
