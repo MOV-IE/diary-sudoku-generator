@@ -28,7 +28,6 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 
 - **New puzzles:** each press of 새 퍼즐 만들기 (new puzzles) makes a different set.
 - **Puzzle number:** every set has a number. Enter it again later to get exactly the same puzzles.
-- **Puzzle code:** every puzzle has a code such as `20270101-03E`: the set number, the position, and a level letter (E easy, M medium, H hard, X expert). Type codes into the 문제 코드로 만들기 (make from codes) box to rebuild just those puzzles; separate several with spaces.
 - **Answer pages:** six answers per page at the back. Given digits use the text color and solved digits use the answer color (red by default). Can be turned off.
 
 ### Layout and labels
@@ -38,7 +37,7 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 - **Number style:** `1`, `01` or `no.1`.
 - **Level label:** English (`easy.`), Korean (`쉬움`), or none.
 - **Difficulty dots (●○○○), a time field, and a footer** (`sudoku` by default) can each be turned on or off.
-- **Puzzle code on the page:** each board shows its code small underneath, and answer pages show it next to the number, so a printed insert is enough to rebuild that puzzle. On by default.
+- **Puzzle number on the page:** each page shows the set's puzzle number (e.g. `#20270101`) small in the bottom-left corner, so a printed insert is enough to rebuild the same puzzles. On by default.
 
 ### Colors and lines
 
@@ -85,4 +84,4 @@ Example: 12 puzzles, two per page, A4 double-sided: 6 puzzle pages + 2 answer pa
 2. Remove digits in pairs mirrored around the center. After each removal, check the puzzle still has exactly one solution, and undo it if not.
 3. Solve it the way a person would, record which techniques were needed, and keep only puzzles that match the chosen level.
 
-Each puzzle gets its own random numbers from the set number and its position, so the same code (set number, position, level) always gives the same puzzle, whatever the size of the set.
+The random numbers come from the puzzle number (seed), so the same number, count and level always give the same puzzles.

@@ -26,7 +26,6 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
 .seg button{border:none;background:#fff;padding:5px 8px;font:inherit;cursor:pointer;color:#444}
 .seg button+button{border-left:1px solid #ccc}
 .seg button.on{background:#8b6b58;color:#fff}
-textarea{width:100%;height:52px;border:1px solid #ccc;border-radius:6px;padding:6px;font:12px/1.4 ui-monospace,Menlo,monospace;resize:vertical}
 .hint{font-size:11px;color:#999;line-height:1.5;margin-top:3px}
 .btn{display:block;width:100%;margin-top:10px;padding:10px;border:none;border-radius:8px;background:#8b6b58;color:#fff;font:600 14px inherit;cursor:pointer}
 .btn.ghost{background:#f3ece7;color:#8b6b58}
@@ -47,7 +46,6 @@ textarea{width:100%;height:52px;border:1px solid #ccc;border-radius:6px;padding:
 .hd{position:absolute;display:flex;align-items:baseline;gap:1.2mm;line-height:1;white-space:nowrap}
 .hd .ab{font-weight:600}
 .hd .dots{margin-left:auto;letter-spacing:.6mm}
-.hd .cd{font-size:5pt;letter-spacing:.2pt;margin-left:1.5mm}
 .hd .tm{margin-left:3mm;font-style:italic}
 .ft{position:absolute;font-size:5.5pt;letter-spacing:.3pt}
 @media print{
@@ -85,9 +83,6 @@ textarea{width:100%;height:52px;border:1px solid #ccc;border-radius:6px;padding:
     <button class="btn" id="shuffle">새 퍼즐 만들기 🎲</button>
     <p class="hint">버튼을 누를 때마다 다른 퍼즐이 나와요. 마음에 드는 묶음은 아래 퍼즐 번호를 적어 두세요. 나중에 그 번호를 넣으면 똑같은 퍼즐이 다시 나와요.</p>
     <div class="row"><label>퍼즐 번호</label><input type="number" data-k="seed" min="1" style="width:100px"></div>
-    <div class="row"><label>문제 코드로 만들기</label></div>
-    <textarea data-k="codes" placeholder="예: 20270101-03E 20270101-11X"></textarea>
-    <p class="hint" id="codesHint">다시 풀고 싶은 문제의 코드를 띄어서 적으면 그 문제만 만들어요. 비워 두면 위 퍼즐 번호로 묶음을 만들어요. 끝 글자는 난이도예요(E 쉬움, M 보통, H 어려움, X 최상).</p>
     <p class="hint">난이도: 쉬움·보통은 빈칸 하나씩 확정하며 풀리고, 어려움은 후보 숫자를 지워 가며(짝·줄 제거), 최상은 그보다 깊은 추론이 필요해요.</p>
   </fieldset>
 
@@ -99,8 +94,8 @@ textarea{width:100%;height:52px;border:1px solid #ccc;border-radius:6px;padding:
     <div class="row"><label>난이도 점 (●○)</label><input type="checkbox" data-k="dots"></div>
     <div class="row"><label>시간 적는 칸</label><input type="checkbox" data-k="timeBox"></div>
     <div class="row"><label>아래 글씨</label><input type="text" data-k="footer" placeholder="예: sudoku"></div>
-    <div class="row"><label>문제 코드 표시</label><input type="checkbox" data-k="showCode"></div>
-    <p class="hint">판마다 아래에 문제 코드(예: 20270101-03E)를 작게 찍어요. 해답 쪽에도 같이 나와요.</p>
+    <div class="row"><label>퍼즐 번호 표시</label><input type="checkbox" data-k="showSeed"></div>
+    <p class="hint">쪽마다 왼쪽 아래에 이 묶음의 퍼즐 번호(#)를 작게 찍어요. 나중에 같은 퍼즐을 다시 만들 때 써요.</p>
   </fieldset>
 
   <fieldset><legend>글꼴</legend>
@@ -323,8 +318,8 @@ function makePuzzle(level, rand) {
 
 /* ---------- 편집기 ---------- */
 const DEFAULTS = {
-  count:12, level:'mix', codes:'', perPage:'2', vAlign:'top', answers:'end', seed:0,
-  numStyle:'01', startNo:1, lvName:'en', dots:false, timeBox:true, footer:'sudoku', showCode:true,
+  count:12, level:'mix', perPage:'2', vAlign:'top', answers:'end', seed:0,
+  numStyle:'01', startNo:1, lvName:'en', dots:false, timeBox:true, footer:'sudoku', showSeed:true,
   font:"'Open Sans'", customFont:'', fsNum:13, digitPct:62,
   lineColor:'#5b4636', lineW:.15, boxW:.4, ink:'#2b2b2b', ansColor:'#c8463a', subColor:'#888888', shade:false, shadeColor:'#f4efeb',
   w:86, h:171, mRing:7, mFree:5, mEnd:5,
@@ -349,32 +344,17 @@ function fontStack() {
 }
 
 // 퍼즐 묶음: 같은 번호·수·난이도면 늘 같은 퍼즐이 나와요
-// 문제 코드: 퍼즐 번호-순번+난이도 글자 (예: 20270101-03E). 이 코드 하나로 그 문제를 똑같이 다시 만들어요.
-const LV_CODE = {easy:'E', medium:'M', hard:'H', expert:'X'};
-const CODE_LV = {E:'easy', M:'medium', H:'hard', X:'expert'};
-const puzzleCode = (seed, idx, level) => `${seed}-${pad(idx + 1)}${LV_CODE[level]}`;
-// 문제마다 (퍼즐 번호, 순번)으로 따로 난수를 만들어서, 묶음의 퍼즐 수가 달라도 같은 문제가 나와요
-const puzzleRand = (seed, idx) => rng(Math.imul(seed >>> 0, 0x9E3779B1) ^ Math.imul(idx + 1, 0x85EBCA77));
-function parseCodes(text) {
-  const ok = [], bad = [];
-  String(text).split(/[\s,]+/).filter(Boolean).forEach(t => {
-    const m = t.trim().toUpperCase().replace(/^#/, '').match(/^(\d{1,9})-(\d{1,3})([EMHX])$/);
-    if (m && +m[1] > 0 && +m[2] > 0) ok.push({seed: +m[1], idx: +m[2] - 1, level: CODE_LV[m[3]]}); else bad.push(t);
-  });
-  return {ok, bad};
-}
-const memo = new Map(); // 같은 코드는 한 번만 만들어요
-function makeByCode(seed, idx, level) {
-  const code = puzzleCode(seed, idx, level);
-  if (!memo.has(code)) memo.set(code, {...makePuzzle(level, puzzleRand(seed, idx)), idx, code});
-  return memo.get(code);
-}
-// 문제 코드를 넣었으면 그 문제들만, 아니면 퍼즐 번호·퍼즐 수·난이도로 묶음을 만들어요
+let cache = {key:'', list:[]};
 function puzzles() {
-  const picked = parseCodes(st.codes).ok;
-  if (picked.length) return picked.slice(0, 120).map(c => makeByCode(c.seed, c.idx, c.level));
-  const n = Math.max(1, Math.min(120, Math.round(+st.count) || 1)), list = [];
-  for (let i = 0; i < n; i++) list.push(makeByCode(+st.seed, i, st.level === 'mix' ? LEVELS[Math.min(3, Math.floor(i * 4 / n))] : st.level));
+  const n = Math.max(1, Math.min(120, Math.round(+st.count) || 1));
+  const key = `${st.seed}|${n}|${st.level}`;
+  if (cache.key === key) return cache.list;
+  const rand = rng(+st.seed), list = [];
+  for (let i = 0; i < n; i++) {
+    const lv = st.level === 'mix' ? LEVELS[Math.min(3, Math.floor(i * 4 / n))] : st.level;
+    list.push(makePuzzle(lv, rand));
+  }
+  cache = {key, list};
   return list;
 }
 
@@ -384,7 +364,7 @@ function css() {
 .hd .n{font-size:${st.fsNum}pt}
 .hd .ab{font-size:${st.fsNum*.42}pt}
 .hd .dots,.hd .tm{font-size:${st.fsNum*.4}pt;color:${st.subColor}}
-.ft,.hd .cd{color:${st.subColor}}
+.ft{color:${st.subColor}}
 .page svg text{fill:${st.ink}} .page svg .an{fill:${st.ansColor}}
 .page svg .ln{fill:none;stroke:${st.lineColor}} .page svg .sh{fill:${st.shadeColor}}
 @page{size:${st.w}mm ${st.h}mm;margin:0}
@@ -424,7 +404,9 @@ function pageWrap(inner, back) {
     ring += `<div class="ringstrip" style="${back ? 'right' : 'left'}:0;width:${band}mm"></div>`;
     [-63.5, -44.5, -25.5, 25.5, 44.5, 63.5].forEach(d => ring += `<div class="ringhole" style="left:${cx - dia/2}mm;top:${cy + d - dia/2}mm;width:${dia}mm;height:${dia}mm"></div>`);
   }
-  const ft = st.footer ? `<div class="ft" style="right:${f.right}mm;bottom:${Math.max(1, f.bot - 3.6)}mm">${esc(st.footer)}</div>` : '';
+  const fb = Math.max(1, f.bot - 3.6);
+  const ft = (st.footer ? `<div class="ft" style="right:${f.right}mm;bottom:${fb}mm">${esc(st.footer)}</div>` : '')
+    + (st.showSeed ? `<div class="ft" style="left:${f.left}mm;bottom:${fb}mm">#${st.seed}</div>` : '');
   return `<section class="page">${inner}${ft}${ring}</section>`;
 }
 function puzzlePage(items, back) {
@@ -440,7 +422,6 @@ function puzzlePage(items, back) {
       + (st.dots ? `<span class="dots">${dotStr(lv)}</span>` : '')
       + (st.timeBox ? `<span class="tm"${st.dots ? '' : ' style="margin-left:auto"'}>time&nbsp;&nbsp;______</span>` : '') + '</div>';
     h += board(p, x, y + hdH, size, false, false);
-    if (st.showCode) h += `<div class="ft" style="left:${x}mm;top:${y + hdH + size + .8}mm">${p.code}</div>`;
   });
   return pageWrap(h, back);
 }
@@ -452,7 +433,6 @@ function answerPage(items, back) {
   items.forEach(([p, i], k) => {
     const c = k % cols, r = Math.floor(k / cols), x = x0 + c * (size + gx), y = f.top + ttl + r * (lab + size + gy);
     h += `<div class="hd" style="left:${x}mm;top:${y}mm;width:${size}mm;height:${lab - .8}mm"><span class="ab">${numLabel(i)}</span>`
-      + (st.showCode ? `<span class="cd">${p.code}</span>` : '')
       + (st.dots ? `<span class="dots" style="font-size:${st.fsNum*.3}pt">${dotStr(p.level)}</span>` : '') + '</div>';
     h += board(p, x, y + lab, size, true, true);
   });
@@ -493,7 +473,7 @@ function placeSheet(slots, label, o, mirror) {
 let printing = false;
 function render() {
   css();
-  const list = puzzles().map(p => [p, p.idx]);
+  const list = puzzles().map((p, i) => [p, i]);
   const isBack = i => st.duplex === 'duplex' && i % 2 === 1;
   const per = +st.perPage, groups = [];
   for (let i = 0; i < list.length; i += per) groups.push(['q', list.slice(i, i + per)]);
@@ -532,11 +512,6 @@ function render() {
   show('customFontRow', st.font === 'custom');
   show('shadeRow', st.shade);
   show('vAlignRow', st.perPage === '1');
-  const pc = parseCodes(st.codes);
-  document.getElementById('codesHint').innerHTML = pc.bad.length
-    ? `<b style="color:#c8463a">알아볼 수 없는 코드: ${esc(pc.bad.join(' '))}</b> 코드는 20270101-03E처럼 적어요.`
-    : pc.ok.length ? `코드로 고른 문제 ${pc.ok.length}개를 만들었어요. 위의 퍼즐 수·난이도·퍼즐 번호는 쓰지 않아요. 비우면 묶음으로 돌아가요.`
-    : '다시 풀고 싶은 문제의 코드를 띄어서 적으면 그 문제만 만들어요. 비워 두면 위 퍼즐 번호로 묶음을 만들어요. 끝 글자는 난이도예요(E 쉬움, M 보통, H 어려움, X 최상).';
   ['cropRow','orientRow','safeRow'].forEach(id => show(id, st.sheet !== 'orig'));
   save();
 }
@@ -562,7 +537,7 @@ const forPrint = on => { if (printing !== on) { printing = on; render(); } };
 window.addEventListener('beforeprint', () => forPrint(true));
 window.addEventListener('afterprint', () => forPrint(false));
 document.getElementById('print').onclick = () => { forPrint(true); window.print(); forPrint(false); };
-document.getElementById('shuffle').onclick = () => { st.seed = newSeed(); st.codes = ''; document.querySelector('[data-k=seed]').value = st.seed; document.querySelector('[data-k=codes]').value = ''; render(); };
+document.getElementById('shuffle').onclick = () => { st.seed = newSeed(); document.querySelector('[data-k=seed]').value = st.seed; render(); };
 document.getElementById('reset').onclick = () => { st = {...DEFAULTS, seed: newSeed()}; bind(); render(); };
 // 열 때마다 새 퍼즐 (설정은 그대로 기억해요)
 st.seed = newSeed();
