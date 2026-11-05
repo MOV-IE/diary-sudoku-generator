@@ -29,7 +29,6 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
 .hint{font-size:11px;color:#999;line-height:1.5;margin-top:3px}
 .btn{display:block;width:100%;margin-top:10px;padding:10px;border:none;border-radius:8px;background:#8b6b58;color:#fff;font:600 14px inherit;cursor:pointer}
 .btn.ghost{background:#f3ece7;color:#8b6b58}
-.btn:disabled{opacity:.6;cursor:wait}
 #stage{flex:1;padding:24px;overflow:auto}
 #pages{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}
 .sheetlbl{font-size:10px;color:#777;margin-bottom:4px}
@@ -327,11 +326,13 @@ const DEFAULTS = {
 };
 const KEY = 'sudoku-editor-v1';
 let st = {...DEFAULTS};
-try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) st = {...DEFAULTS, ...s}; } catch(e) {}
+try { // 지금 쓰는 설정만 불러와요 (예전 버전에서 남은 값은 버려요)
+  const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (s) for (const k in s) if (k in DEFAULTS || k === 'fontVer') st[k] = s[k];
+} catch(e) {}
 if (st.fontVer !== 2) { if (st.font === "Futura, 'Futura PT', Jost" || st.font === 'Jost') st.font = "'Open Sans'"; st.fontVer = 2; } // 예전 기본 폰트로 저장된 설정은 Open Sans로
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
 const newSeed = () => 1 + Math.floor(Math.random() * 999999);
-if (!+st.seed) st.seed = newSeed();
 
 const LEVELS = ['easy','medium','hard','expert'];
 const LV_KO = {easy:'쉬움', medium:'보통', hard:'어려움', expert:'최상'};
@@ -516,6 +517,9 @@ function render() {
   save();
 }
 
+// 색·숫자를 끌거나 빠르게 바꿀 때는 화면을 한 번 그릴 때마다 한 번만 다시 그려요
+let queued = false;
+const schedule = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; render(); }); } };
 function bind() {
   document.querySelectorAll('[data-k]').forEach(el => {
     const k = el.dataset.k;
@@ -528,7 +532,7 @@ function bind() {
     } else {
       el.value = st[k];
       const ev = el.dataset.k === 'count' || el.dataset.k === 'seed' ? 'onchange' : 'oninput'; // 퍼즐을 새로 만드는 값은 입력을 마친 뒤에 반영
-      el[ev] = () => { st[k] = (el.type === 'number' || el.type === 'range') ? (el.value === '' ? 0 : +el.value) : el.value; if (k === 'seed' && !+st.seed) st.seed = newSeed(); render(); };
+      el[ev] = () => { st[k] = (el.type === 'number' || el.type === 'range') ? (el.value === '' ? 0 : +el.value) : el.value; if (k === 'seed' && !+st.seed) st.seed = newSeed(); schedule(); };
     }
   });
 }
