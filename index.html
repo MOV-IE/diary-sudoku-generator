@@ -94,6 +94,8 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
     <div class="row"><label>난이도 점 (●○)</label><input type="checkbox" data-k="dots"></div>
     <div class="row"><label>시간 적는 칸</label><input type="checkbox" data-k="timeBox"></div>
     <div class="row"><label>아래 글씨</label><input type="text" data-k="footer" placeholder="예: sudoku"></div>
+    <div class="row"><label>퍼즐 번호 표시</label><input type="checkbox" data-k="showSeed"></div>
+    <p class="hint">쪽마다 왼쪽 아래에 이 묶음의 퍼즐 번호(#)를 작게 찍어요. 나중에 같은 퍼즐을 다시 만들 때 써요.</p>
   </fieldset>
 
   <fieldset><legend>글꼴</legend>
@@ -317,7 +319,7 @@ function makePuzzle(level, rand) {
 /* ---------- 편집기 ---------- */
 const DEFAULTS = {
   count:12, level:'mix', perPage:'2', vAlign:'top', answers:'end', seed:0,
-  numStyle:'01', startNo:1, lvName:'en', dots:false, timeBox:true, footer:'sudoku',
+  numStyle:'01', startNo:1, lvName:'en', dots:false, timeBox:true, footer:'sudoku', showSeed:true,
   font:"'Open Sans'", customFont:'', fsNum:13, digitPct:62,
   lineColor:'#5b4636', lineW:.15, boxW:.4, ink:'#2b2b2b', ansColor:'#c8463a', subColor:'#888888', shade:false, shadeColor:'#f4efeb',
   w:86, h:171, mRing:7, mFree:5, mEnd:5,
@@ -402,7 +404,9 @@ function pageWrap(inner, back) {
     ring += `<div class="ringstrip" style="${back ? 'right' : 'left'}:0;width:${band}mm"></div>`;
     [-63.5, -44.5, -25.5, 25.5, 44.5, 63.5].forEach(d => ring += `<div class="ringhole" style="left:${cx - dia/2}mm;top:${cy + d - dia/2}mm;width:${dia}mm;height:${dia}mm"></div>`);
   }
-  const ft = st.footer ? `<div class="ft" style="right:${f.right}mm;bottom:${Math.max(1, f.bot - 3.6)}mm">${esc(st.footer)}</div>` : '';
+  const fb = Math.max(1, f.bot - 3.6);
+  const ft = (st.footer ? `<div class="ft" style="right:${f.right}mm;bottom:${fb}mm">${esc(st.footer)}</div>` : '')
+    + (st.showSeed ? `<div class="ft" style="left:${f.left}mm;bottom:${fb}mm">#${st.seed}</div>` : '');
   return `<section class="page">${inner}${ft}${ring}</section>`;
 }
 function puzzlePage(items, back) {

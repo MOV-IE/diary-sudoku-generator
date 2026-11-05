@@ -37,6 +37,7 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 - **Number style:** `1`, `01` or `no.1`.
 - **Level label:** English (`easy.`), Korean (`쉬움`), or none.
 - **Difficulty dots (●○○○), a time field, and a footer** (`sudoku` by default) can each be turned on or off.
+- **Puzzle number on the page:** each page shows the set's puzzle number (e.g. `#20270101`) small in the bottom-left corner, so a printed insert is enough to rebuild the same puzzles. On by default.
 
 ### Colors and lines
 
