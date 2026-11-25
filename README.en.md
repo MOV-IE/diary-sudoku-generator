@@ -50,9 +50,9 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 - **Insert size and margins:** width, height, ring-side margin, outer margin, top and bottom margin.
 - **Paper:**
   - **Insert size:** one insert per PDF page at actual size.
-  - **A4 / A3:** several inserts per sheet with crop marks. Choose auto, portrait or landscape, and set the printer's safe margin. 86×171mm fits 3 per A4 landscape sheet and 6 per A3 portrait sheet.
+  - **A4 / A5:** several inserts per sheet with crop marks that run from each page boundary to the paper edge. Choose auto, portrait or landscape, and set the printer's safe margin. 86×171mm fits 3 per A4 landscape sheet and 1 per A5 sheet.
 - **Single or double-sided:** see "Double-sided printing" below.
-- **Preview:** shows the ring holes (6-ring bible layout) on screen only; they never print. Zoom is adjustable.
+- **Preview:** shows the ring area as a light band with dashed lines and outlined holes (6-ring bible layout) on screen only; they never print. Zoom is adjustable.
 
 ## How to use
 
@@ -69,7 +69,7 @@ Your settings are saved in the browser and come back next time; the puzzles are 
 With double-sided on, even pages are treated as backs and their ring margin moves to the other side (right), so the ring holes never cut into a puzzle on either side.
 
 - **At insert size:** odd pages have the ring on the left, even pages on the right. Print with your printer's duplex setting as is.
-- **On A4 / A3:** front and back sheets alternate. Each back sheet is mirrored left to right, so when the paper is turned over every page's back lands exactly behind its front. Turn on duplex and use the flip edge shown under the preview (**short edge** for landscape sheets, **long edge** for portrait).
+- **On A4 / A5:** front and back sheets alternate. Each back sheet is mirrored left to right, so when the paper is turned over every page's back lands exactly behind its front. Turn on duplex and use the flip edge shown under the preview (**short edge** for landscape sheets, **long edge** for portrait).
 - **Answer pages** always start on the front of a new leaf. If the puzzle pages come to an odd number, one blank page is added.
 
 Example: 12 puzzles, two per page, A4 double-sided: 6 puzzle pages + 2 answer pages = 8 pages = 4 leaves. A4 landscape holds 3 leaves, so it prints on 2 sheets of A4, both sides.
