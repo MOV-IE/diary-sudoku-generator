@@ -35,8 +35,7 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
 .sheet{overflow:hidden;background:#fff;position:relative;box-shadow:0 1px 6px rgba(0,0,0,.12)}
 .sheet .page{position:absolute}
 .cm{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
-.ringstrip{position:absolute;top:0;bottom:0;background:rgba(139,107,88,.07);pointer-events:none}
-.ringhole{position:absolute;border-radius:50%;border:.3mm dashed #b9a597;background:#ecebe8;pointer-events:none}
+.ringsvg{position:absolute;pointer-events:none}
 .solo{box-shadow:0 1px 6px rgba(0,0,0,.12)}
 /* page */
 .page{position:relative;overflow:hidden;background:#fff}
@@ -50,7 +49,7 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
 @media print{
   html,body{background:#fff;display:block;min-height:0 !important;height:auto !important}
   #panel{display:none}
-  .ringstrip,.ringhole{display:none !important}
+  .ringsvg{display:none !important}
   #stage{padding:0;overflow:visible}
   #pages{display:block;zoom:1 !important}
   .solo{box-shadow:none;break-after:page;page-break-after:always}
@@ -131,7 +130,7 @@ legend{font-weight:600;font-size:12px;color:#8b6b58;padding-right:6px}
   </fieldset>
 
   <fieldset><legend>출력 용지</legend>
-    <div class="row"><label>용지</label><div class="seg" data-k="sheet"><button data-v="orig">속지 크기</button><button data-v="a4">A4</button><button data-v="a3">A3</button></div></div>
+    <div class="row"><label>용지</label><div class="seg" data-k="sheet"><button data-v="orig">속지 크기</button><button data-v="a4">A4</button><button data-v="a5">A5</button></div></div>
     <div class="row" id="orientRow"><label>방향</label><div class="seg" data-k="orient"><button data-v="auto">자동</button><button data-v="portrait">세로</button><button data-v="landscape">가로</button></div></div>
     <div class="row" id="safeRow"><label>프린터 안전 여백 (mm)</label><input type="number" data-k="safe" step="1" min="0"></div>
     <div class="row"><label>인쇄 면</label><div class="seg" data-k="duplex"><button data-v="single">단면</button><button data-v="duplex">양면</button></div></div>
@@ -331,6 +330,7 @@ try { // 지금 쓰는 설정만 불러와요 (예전 버전에서 남은 값은
   if (s) for (const k in s) if (k in DEFAULTS || k === 'fontVer') st[k] = s[k];
 } catch(e) {}
 if (st.fontVer !== 2) { if (st.font === "Futura, 'Futura PT', Jost" || st.font === 'Jost') st.font = "'Open Sans'"; st.fontVer = 2; } // 예전 기본 폰트로 저장된 설정은 Open Sans로
+if (st.sheet === 'a3') st.sheet = 'a4'; // 출력 용지에서 A3를 빼고 A5를 넣었어요
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
 const newSeed = () => 1 + Math.floor(Math.random() * 999999);
 
@@ -388,6 +388,29 @@ function board(p, x, y, size, withAns, small) {
   }
   return s + '</g></svg>';
 }
+// 링 부분 표시 (화면에서만, 인쇄되지 않아요): 연한 띠 + 띠 경계와 구멍 중심을 지나는 점선 + 점 + 구멍 테두리
+// 구멍 위치는 6공 바이블 규격 19-19-51-19-19mm
+const RING_HOLES = [-63.5, -44.5, -25.5, 25.5, 44.5, 63.5];
+function ringSvg(len, band, edgeFirst, horizontal, pos) {
+  const vi = edgeFirst ? band : 0, s = edgeFirst ? -1 : 1, vc = band / 2;   // vi: 속지 안쪽 경계, s: 안쪽 경계 → 종이 끝 방향
+  const W = horizontal ? len : band, H = horizontal ? band : len;
+  const ln = v => horizontal ? `M0 ${v}H${len}` : `M${v} 0V${len}`;
+  const pt = (u, v) => horizontal ? [u, v] : [v, u];
+  let dots = '';
+  for (let k = -Math.floor(len / 9.5); k <= Math.floor(len / 9.5); k++) {
+    const u = len / 2 + k * 4.75;
+    if (u < 1 || u > len - 1) continue;
+    [vi + s * band * .15, vi + s * band * .65].forEach(v => { const [x, y] = pt(u, v); dots += `<circle cx="${x}" cy="${y}" r=".17"/>`; });
+  }
+  const r = Math.min(5, band * .45) / 2;
+  const holes = RING_HOLES.map(d => { const [x, y] = pt(len / 2 + d, vc); return `<circle cx="${x}" cy="${y}" r="${r}"/>`; }).join('');
+  return `<svg class="ringsvg" viewBox="0 0 ${W} ${H}" style="width:${W}mm;height:${H}mm;${pos}">`
+    + `<rect width="${W}" height="${H}" fill="#f2f5f8"/>`
+    + `<path d="${ln(vi + s * .1)}${ln(vc)}" stroke="#b4bfcd" stroke-width=".18" stroke-dasharray="1.2 .9" fill="none"/>`
+    + `<g fill="#b4bfcd">${dots}</g>`
+    + `<g fill="none" stroke="#8d939a" stroke-width=".2">${holes}</g></svg>`;
+}
+
 const numLabel = i => { const n = i + Math.max(1, Math.round(+st.startNo) || 1); return st.numStyle === '01' ? pad(n) : st.numStyle === 'no' ? `no.${n}` : String(n); };
 const lvLabel = lv => st.lvName === 'en' ? `${lv}.` : st.lvName === 'ko' ? LV_KO[lv] : '';
 const dotStr = lv => '●'.repeat(LEVELS.indexOf(lv)+1) + '○'.repeat(3-LEVELS.indexOf(lv));
@@ -401,14 +424,13 @@ function pageWrap(inner, back) {
   const f = frame(back);
   let ring = '';
   if (st.showRing && !printing) {
-    const band = Math.max(3, +st.mRing - 1), dia = Math.min(5, band - 1), cy = +st.h / 2, cx = back ? +st.w - band/2 : band/2;
-    ring += `<div class="ringstrip" style="${back ? 'right' : 'left'}:0;width:${band}mm"></div>`;
-    [-63.5, -44.5, -25.5, 25.5, 44.5, 63.5].forEach(d => ring += `<div class="ringhole" style="left:${cx - dia/2}mm;top:${cy + d - dia/2}mm;width:${dia}mm;height:${dia}mm"></div>`);
+    const band = Math.max(3, +st.mRing);
+    ring = ringSvg(+st.h, band, !back, false, `${back ? 'right' : 'left'}:0;top:0`);
   }
   const fb = Math.max(1, f.bot - 3.6);
   const ft = (st.footer ? `<div class="ft" style="right:${f.right}mm;bottom:${fb}mm">${esc(st.footer)}</div>` : '')
     + (st.showSeed ? `<div class="ft" style="left:${f.left}mm;bottom:${fb}mm">#${st.seed}</div>` : '');
-  return `<section class="page">${inner}${ft}${ring}</section>`;
+  return `<section class="page">${ring}${inner}${ft}</section>`; // 띠는 내용 뒤에 깔아요
 }
 function puzzlePage(items, back) {
   const f = frame(back), per = +st.perPage, hdH = st.fsNum * .353 + 2.5, gap = 6;
@@ -440,7 +462,7 @@ function answerPage(items, back) {
   return pageWrap(h, back);
 }
 
-const PAPERS = { a4: [210, 297], a3: [297, 420] };
+const PAPERS = { a4: [210, 297], a5: [148, 210] };
 function layout() {
   const [pw0, ph0] = PAPERS[st.sheet], pw = +st.w, ph = +st.h, m = +st.safe;
   const fit = (W, H) => ({ W, H, cols: Math.max(0, Math.floor((W - 2*m) / pw)), rows: Math.max(0, Math.floor((H - 2*m) / ph)) });
@@ -461,12 +483,12 @@ function placeSheet(slots, label, o, mirror) {
     h += html.replace('<section class="page', `<section style="left:${o.x0 + c*pw}mm;top:${o.y0 + r*ph}mm" class="page`);
   });
   if (st.crop) {
-    // 재단선은 한 장 전체를 덮는 SVG 선으로 그려요. 아주 얇은 div는 뷰어·배율에 따라 0px로 뭉개져 사라질 수 있어요.
-    const g = 2, L = 5, x1 = o.x0 + o.cols*pw, y1 = o.y0 + o.rows*ph;
+    // 재단선은 SVG 선으로, 바깥 끝이 용지 끝에 닿게 그려요.
+    const g = 2, x1 = o.x0 + o.cols*pw, y1 = o.y0 + o.rows*ph;
     let d = '';
-    for (let c = 0; c <= o.cols; c++) { const x = o.x0 + c*pw; d += `M${x} ${o.y0 - g - L}v${L}M${x} ${y1 + g}v${L}`; }
-    for (let r = 0; r <= o.rows; r++) { const y = o.y0 + r*ph; d += `M${o.x0 - g - L} ${y}h${L}M${x1 + g} ${y}h${L}`; }
-    h += `<svg class="cm" viewBox="0 0 ${o.W} ${o.H}" style="width:${o.W}mm;height:${o.H}mm"><path d="${d}" stroke="#000" stroke-width=".1" fill="none"/></svg>`;
+    for (let c = 0; c <= o.cols; c++) { const x = o.x0 + c*pw; d += `M${x} 0V${o.y0 - g}M${x} ${y1 + g}V${o.H}`; }
+    for (let r = 0; r <= o.rows; r++) { const y = o.y0 + r*ph; d += `M0 ${y}H${o.x0 - g}M${x1 + g} ${y}H${o.W}`; }
+    h += `<svg class="cm" viewBox="0 0 ${o.W} ${o.H}" style="left:0;top:0;width:${o.W}mm;height:${o.H}mm"><path d="${d}" stroke="#000" stroke-width=".1" fill="none"/></svg>`;
   }
   return `<div class="sheetwrap"><div class="sheetlbl">${label}</div><div class="sheet" style="width:${o.W - 0.2}mm;height:${o.H - 0.2}mm">${h}</div></div>`;
 }
