@@ -70,6 +70,7 @@ With double-sided on, even pages are treated as backs and their ring margin move
 
 - **At insert size:** odd pages have the ring on the left, even pages on the right. Print with your printer's duplex setting as is.
 - **On A4 / A5:** front and back sheets alternate. Each back sheet is mirrored left to right, so when the paper is turned over every page's back lands exactly behind its front. Turn on duplex and use the flip edge shown under the preview (**short edge** for landscape sheets, **long edge** for portrait).
+- If the back is slightly off from the front, enter values in **back offset X / Y (mm)**. On A4 / A5 double-sided layouts this shifts only the back sheets. Positive X moves right and positive Y moves down, as seen looking at the back. Print a test sheet, hold it to the light, and enter the crop-mark offset in the opposite direction.
 - **Answer pages** always start on the front of a new leaf. If the puzzle pages come to an odd number, one blank page is added.
 
 Example: 12 puzzles, two per page, A4 double-sided: 6 puzzle pages + 2 answer pages = 8 pages = 4 leaves. A4 landscape holds 3 leaves, so it prints on 2 sheets of A4, both sides.
