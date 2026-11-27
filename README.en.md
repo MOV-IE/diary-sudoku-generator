@@ -42,7 +42,7 @@ Inserts are 86×171mm by default, with one or two puzzles per page and answer pa
 ### Colors and lines
 
 - **Sizes:** number label size and digit size relative to the cell.
-- **Colors:** lines (dark brown #5B4636 by default), text, answer digits, dots and footer.
+- **Colors:** lines (#1A1A1A by default), text, answer digits, dots and footer. Colors can be picked or typed as a hex code (#1A1A1A).
 - **Lines:** separate widths for thin cell lines and thick 3×3 lines, plus optional shading on alternate 3×3 boxes.
 
 ### Size and output
