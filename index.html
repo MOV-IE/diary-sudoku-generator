@@ -325,17 +325,18 @@ const DEFAULTS = {
   numStyle:'01', startNo:1, lvName:'en', dots:false, timeBox:true, footer:'sudoku', showSeed:true,
   font:"'Open Sans'", customFont:'', fsNum:13, digitPct:62,
   lineColor:'#1a1a1a', lineW:.15, boxW:.4, ink:'#2b2b2b', ansColor:'#c8463a', subColor:'#888888', shade:false, shadeColor:'#f4efeb',
-  w:86, h:171, mRing:7, mFree:5, mEnd:5,
+  w:86, h:171, mRing:10, mFree:5, mEnd:5,
   sheet:'orig', orient:'auto', safe:5, duplex:'single', backX:0, backY:0, crop:true, zoom:1.8, showRing:true
 };
 const KEY = 'sudoku-editor-v1';
 let st = {...DEFAULTS};
 try { // 지금 쓰는 설정만 불러와요 (예전 버전에서 남은 값은 버려요)
   const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-  if (s) for (const k in s) if (k in DEFAULTS || k === 'fontVer' || k === 'lineVer') st[k] = s[k];
+  if (s) for (const k in s) if (k in DEFAULTS || k === 'fontVer' || k === 'lineVer' || k === 'ringVer') st[k] = s[k];
 } catch(e) {}
 if (st.fontVer !== 2) { if (st.font === "Futura, 'Futura PT', Jost" || st.font === 'Jost') st.font = "'Open Sans'"; st.fontVer = 2; } // 예전 기본 폰트로 저장된 설정은 Open Sans로
 if (st.lineVer !== 2) { if (st.lineColor === '#5b4636') st.lineColor = '#1a1a1a'; st.lineVer = 2; } // 예전 기본 선 색으로 저장된 설정은 새 기본값으로
+if (st.ringVer !== 2) { if (+st.mRing === 7) st.mRing = 10; st.ringVer = 2; } // 예전 기본 링 쪽 여백으로 저장된 설정은 10mm로
 if (st.sheet === 'a3') st.sheet = 'a4'; // 출력 용지에서 A3를 빼고 A5를 넣었어요
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} };
 const newSeed = () => 1 + Math.floor(Math.random() * 999999);
